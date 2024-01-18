@@ -23,9 +23,33 @@
 </script>
 <script type="text/babel" data-type="module">
 import React from 'react';
-import { HashRouter, Link, useLocation } from 'react-router-dom';
+import {
+  Routes,
+  Route,
+  HashRouter,
+  Link,
+  useLocation,
+  useParams,
+  useNavigate
+} from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
 
+const Home = ()=> <hr />;
+
+const GuestDetail = ({ guests })=> {
+  const params = useParams();
+  const id = params.id*1;
+  const guest = guests.find(guest => guest.id === id);
+  if(!guest){
+    return null;
+  }
+  return (
+    <div>
+      <h2>{ guest.name }</h2>
+      <Link to='/guests'>Back to guests</Link>
+    </div>
+  );
+};
 const Guests = ({ guests, destroyGuest })=> {
   return (
     <ul>
@@ -33,7 +57,9 @@ const Guests = ({ guests, destroyGuest })=> {
         guests.map( guest => {
           return (
             <li key={ guest.id }>
+              <Link to={`/guests/${guest.id}`}>
               { guest.name }
+              </Link>
               <button onClick={()=> destroyGuest(guest)}>x</button>
             </li>
           );
@@ -83,6 +109,7 @@ const CreateGuest = ({ createGuest })=> {
 function App() {
   const BASE_URL = 'https://fsa-crud-2aa9294fe819.herokuapp.com/api/2309_ftb_et_web_am/guests';
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   const [guests, setGuests] = React.useState([]);
  
@@ -106,7 +133,10 @@ function App() {
       }
     });
     const json = await response.json();
-    setGuests([...guests, json.data]);
+    guest = json.data;
+    setGuests([...guests, guest]);
+    navigate(`/guests/${guest.id}`);
+
   }
   
   React.useEffect(()=> {
@@ -128,11 +158,35 @@ function App() {
             Home
         </Link>
         <Link
-          className={ pathname === '/guests' ? 'selected': ''}
+          className={ pathname.startsWith('/guests') ? 'selected': ''}
           to='/guests'>
             Guests
         </Link>
+        <Link
+          className={ pathname === '/createGuest' ? 'selected': ''}
+          to='/createGuest'>
+            Create Guest
+        </Link>
       </nav>
+      <Routes>
+        <Route
+          path='/guests'
+          element={ <Guests guests={ guests } destroyGuest={ destroyGuest }/> }
+      />
+        <Route
+          path='/createGuest'
+          element = {
+            <CreateGuest createGuest={ createGuest }/>
+          }
+        />
+        <Route path='/' element={ <Home />} />
+        <Route
+          path='/guests/:id'
+          element = {
+            <GuestDetail guests={ guests }/>
+          }
+        />
+      </Routes>
 
     </div>
   );
