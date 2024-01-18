@@ -16,12 +16,14 @@
 {
   "imports": {
     "react": "https://esm.sh/react?dev",
-    "react-dom/client": "https://esm.sh/react-dom/client?dev"
+    "react-dom/client": "https://esm.sh/react-dom/client?dev",
+    "react-router-dom": "https://esm.sh/react-router-dom?dev"
   }
 }
 </script>
 <script type="text/babel" data-type="module">
 import React from 'react';
+import { HashRouter, Link, useLocation } from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
 
 const Guests = ({ guests, destroyGuest })=> {
@@ -80,6 +82,7 @@ const CreateGuest = ({ createGuest })=> {
 
 function App() {
   const BASE_URL = 'https://fsa-crud-2aa9294fe819.herokuapp.com/api/2309_ftb_et_web_am/guests';
+  const { pathname } = useLocation();
 
   const [guests, setGuests] = React.useState([]);
  
@@ -118,15 +121,28 @@ function App() {
   return (
     <div>
       <h1>The Acme Guests CRD { guests.length }</h1>
-      <CreateGuest createGuest={ createGuest }/>
-      <Guests guests={ guests } destroyGuest={ destroyGuest }/>
+      <nav>
+        <Link
+          className={ pathname === '/' ? 'selected': ''}
+          to='/'>
+            Home
+        </Link>
+        <Link
+          className={ pathname === '/guests' ? 'selected': ''}
+          to='/guests'>
+            Guests
+        </Link>
+      </nav>
+
     </div>
   );
 }
 
 const root = createRoot(document.getElementById('root'));
 root.render(
-  <App />
+  <HashRouter>
+    <App />
+  </HashRouter>
 );
 </script>
 </html>
